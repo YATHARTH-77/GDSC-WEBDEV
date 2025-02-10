@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Times New Roman', Times, serif;
+            background-image: url('https://i.imghippo.com/files/qmhG3778AU.png');
+            background-size: cover;
+            background-position: center;
+            color: #bcb5b5;
+        }
+
+        .container {
+            background-color: rgb(67, 67, 67);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.1);
+            width: 425px;
+        }
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 40px;
+}
+         h3 {
+           text-align: left;
+            margin-bottom: 20px;
+        }
+
+        #habit-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 3px solid #d73e6f00;
+            border-radius: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: rgb(67, 67, 67);
+            color: #bcb5b5;
+            font-size: medium;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #00eb2370;
+        }
+
+        .habit-item {
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background-color:rgb(67, 67, 67);
+            border-radius: 13px;
+            border: 2px solid #ddd;
+            button:hover{
+                background-color: rgb(156, 181, 250);
+                
+            }
+        }
+
+        .streak {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color:rgb(67, 67, 67);
+            color: #bcb5b5;
+        }
+
+        .reset-all-button {
+            margin-top: 20px;
+            background-color: rgb(67, 67, 67);
+        }
+
+        #habit-summary {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Habit Tracker</h1>
+
+        <div id="habit-list"></div>
+
+        <input type="text" id="habit-input" placeholder="Enter a new habit" />
+        <button onclick="addHabit()">Add Habit</button>
+
+        <h3>Track Your Streaks</h3>
+        <div id="habit-streaks"></div>
+
+        <div id="habit-summary">Completed: 0 / 0</div>
+
+        <button class="reset-all-button" onclick="resetAllHabits()">Reset All Habits</button>
+    </div>
+
+    <script>
+        let habits = [];
+
+        function addHabit() {
+            const habitInput = document.getElementById('habit-input');
+            const habitName = habitInput.value.trim();
+
+            if (habitName === '') {
+                alert('Enter Valid Habit');
+                return;
+            }
+
+            const habit = {
+                name: habitName,
+                streak: 0,
+                lastCompleted: null
+            };
+
+            habits.push(habit);
+            habitInput.value = '';
+            renderHabits();
+        }
+
+        function markAsCompleted(index) {
+            const today = new Date().toDateString();
+            const habit = habits[index];
+
+            if (habit.lastCompleted === today) {
+                alert('This habit is already marked for today.');
+                return;
+            }
+
+            habit.lastCompleted = today;
+            habit.streak++;
+            renderHabits();
+        }
+
+        function resetStreak(index) {
+            habits[index].streak = 0;
+            habits[index].lastCompleted = null;
+            renderHabits();
+        }
+
+        function resetAllHabits() {
+            habits = [];
+            renderHabits();
+        }
+
+        function renderHabits() {
+            const habitList = document.getElementById('habit-list');
+            const habitStreaks = document.getElementById('habit-streaks');
+            const habitSummary = document.getElementById('habit-summary');
+
+            habitList.innerHTML = '';
+            habitStreaks.innerHTML = '';
+
+            let completedCount = 0;
+            let completedHabits = [];
+
+            habits.forEach((habit, index) => {
+                if (habit.lastCompleted === new Date().toDateString()) {
+                    completedCount++;
+                    completedHabits.push(habit.name);
+                }
+
+                const habitDiv = document.createElement('div');
+                habitDiv.classList.add('habit-item');
+
+                const streakDiv = document.createElement('div');
+                streakDiv.classList.add('streak');
+                streakDiv.innerText = `Streak: ${habit.streak}`;
+
+                const habitText = document.createElement('span');
+                habitText.innerText = habit.name;
+
+                const completeButton = document.createElement('button');
+                completeButton.innerHTML = '✅';
+                completeButton.onclick = () => markAsCompleted(index);
+
+                const resetButton = document.createElement('button');
+                resetButton.innerHTML = '🔄';
+                resetButton.onclick = () => resetStreak(index);
+
+                habitDiv.appendChild(habitText);
+                habitDiv.appendChild(completeButton);
+                habitDiv.appendChild(resetButton);
+                habitDiv.appendChild(streakDiv);
+
+                habitList.appendChild(habitDiv);
+            });
+
+            habitSummary.innerText = `Completed: ${completedCount} / ${habits.length}`;
+            habitStreaks.innerText = completedHabits.length > 0 ? `Completed Streaks: ${completedHabits.join(', ')}` : 'No streaks completed today.';
+
+            if (habits.length >= 6 && completedCount === 0) {
+                alert('please 1st Try to complete at least 1 or 2 habits today !!!');
+            }
+            if (completedCount === 8) {
+                alert('🎉 Congratulations! You have completed 8 habits today! Keep up the great work! 🎉');
+            }
+        }
+    </script>
+</body>
+</html>
